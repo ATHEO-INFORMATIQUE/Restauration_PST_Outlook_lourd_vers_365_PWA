@@ -1,0 +1,1 @@
+PowerShell -NoProfile -ExecutionPolicy Bypass -file "Restauration_PST_365.ps1"
