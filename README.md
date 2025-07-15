@@ -57,10 +57,41 @@ Voici comment adapter le script à votre infrastructure :
 |--------------------|-------------|---------|
 | `$pstBasePath`     | Chemin de base des fichiers PST | `D:\Utilisateurs\$user` |
 | `$logDir`          | Dossier de stockage des logs | `D:\logs` |
+| `\\serveur_distant\BackupPC\Migration_archives_script`          | Dossier de stockage des logs distant| `\\Nas01\Migration_archives_script` |
 | `"OldArchives"`    | Nom du dossier de destination dans Outlook | Peut être changé selon vos besoins |
 | `$minSize`         | Taille minimale d’un fichier PST à traiter | `265KB` par défaut |
 
 ---
+---
+
+## 📝 Note de mise à jour – Version 1.1 (2025-07-15)
+
+### ✅ Ajouts
+
+- **Vérification automatique du lancement d’Outlook** : le script vérifie si Outlook est lancé, le démarre si nécessaire, et le place au premier plan.
+- **Copie automatique du fichier de log** vers le serveur `\\serveur_distant\BackupPC\Migration_archives_script`.
+  - Le nom du fichier inclut désormais le nom de l'utilisateur.
+  - En cas de doublon, un suffixe numérique est ajouté automatiquement (`_1`, `_2`, etc.).
+- **Amélioration des logs** :
+  - Ajout d’un message confirmant la copie du fichier de log sur le serveur.
+  - Meilleure gestion des erreurs et des éléments non traités.
+
+---
+
+## 📄 Exemple de sortie de log
+
+```
+[2025-07-15 08:58:16] Script démarré pour l'utilisateur : tcoutard
+[2025-07-15 08:58:16] Chemin PST détecté : D:\Utilisateurs\tcoutard\PST
+[2025-07-15 08:58:17] Dossier 'OldArchives' créé.
+[2025-07-15 08:58:17] Montage de : D:\Utilisateurs\tcoutard\PST\archive.pst
+[2025-07-15 09:02:01] Ignoré (non-mail) : Calendrier
+[2025-07-15 09:02:01] Ignoré (non-mail) : Tâches
+[2025-07-15 09:02:01] Ignoré (non-mail) : Journal
+[2025-07-15 09:02:38] Ignoré (non-mail) : Notes
+[2025-07-15 09:02:39] PST 'archive.pst' traité et détaché.
+[2025-07-15 09:02:39] Script terminé.
+```
 
 ### ▶️ Exécution
 
