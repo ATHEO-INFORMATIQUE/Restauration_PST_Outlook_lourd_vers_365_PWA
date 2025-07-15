@@ -1,4 +1,4 @@
-﻿<#
+<#
 .DESCRIPTION
     - Ce script détache d'abord tous les fichiers PST montés dans Outlook,
     puis monte les fichiers PST présents dans un dossier spécifique,
@@ -7,12 +7,27 @@
     Fichier de log disponible dans D:\log.
 
 .VERSION
-    1
+    1.1
 
 .AUTHOR
     COUTARD Théo
 
 #>
+
+# Vérifie si Outlook est lancé, sinon le démarre et le place au premier plan
+if (-not (Get-Process -Name "OUTLOOK" -ErrorAction SilentlyContinue)) {
+    Start-Process "outlook.exe"
+    Start-Sleep -Seconds 5
+} else {
+    # Si Outlook est déjà lancé, on le met au premier plan
+    $outlookProcess = Get-Process -Name "OUTLOOK" -ErrorAction SilentlyContinue
+    if ($outlookProcess) {
+        $sig = '[DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);'
+        Add-Type -MemberDefinition $sig -Name NativeMethods -Namespace Win32
+        [Win32.NativeMethods]::SetForegroundWindow($outlookProcess.MainWindowHandle)
+    }
+}
+
 
 # Ignore les messages d'erreur pour éviter d'interrompre le script
 $ErrorActionPreference = "SilentlyContinue"
@@ -158,3 +173,20 @@ foreach ($pst in $pstFiles) {
 
 # Fin du script
 Write-Log "Script terminé."
+
+# Copie du fichier de log vers le serveur avec suffixe numérique si doublon
+$backupPath = "\\serveur_distant\Migration_archives_script"
+$baseName = "Log_migration_archives_${logDate}_$user"
+$extension = ".log"
+$logFileWithUser = Join-Path $backupPath ($baseName + $extension)
+$counter = 1
+
+# Incrémente le nom jusqu'à trouver un nom de fichier disponible
+while (Test-Path -Path $logFileWithUser) {
+    $logFileWithUser = Join-Path $backupPath ("$baseName" + "_$counter" + $extension)
+    $counter++
+}
+
+# Copie le fichier avec le nom unique
+Copy-Item -Path $logFile -Destination $logFileWithUser
+Write-Log "Fichier de log copié vers le serveur : $logFileWithUser"
